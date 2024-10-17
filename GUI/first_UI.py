@@ -57,8 +57,8 @@ class HeaderFooterLayout(BoxLayout):
 
         # Add the reset button at the top of the left column
         reset_button = Button(
-            text='Reset Tabs', 
-            size_hint=(1, 0.1), 
+            text='Reset Tabs',
+            size_hint=(1, 0.1),
             background_color=(1, 0, 0, 1)  # Red color
         )
         reset_button.bind(on_press=self.reset_tabs)
@@ -70,9 +70,8 @@ class HeaderFooterLayout(BoxLayout):
         self.tab_panel = self.create_tabs()
         left_column.add_widget(self.tab_panel)
 
-        # Create the right column content
-        right_column = BoxLayout(orientation='vertical', size_hint_x=0.4)
-        right_column.add_widget(Label(text='Right Column Content', font_size=24))
+        # Create the right column content split into two rows with a separator
+        right_column = self.create_right_column()
 
         # Add the left and right columns to the body
         body.add_widget(left_column)
@@ -108,9 +107,39 @@ class HeaderFooterLayout(BoxLayout):
 
         return tab_panel
 
+    def create_right_column(self):
+        """Create the right column split into two rows with a line separator."""
+        right_column = BoxLayout(orientation='vertical', size_hint_x=0.4, spacing=10)
+
+        # Create two rows
+        row1 = Label(text='SIGNAL', font_size=24, size_hint=(1, 0.5),color=(1,1,0,1))
+        row2 = Label(text='METRICS', font_size=24, size_hint=(1, 0.5),color=(1,1,0,1))
+
+        # Add the first row
+        right_column.add_widget(row1)
+
+        # Draw a separator line between the two rows
+        with right_column.canvas.after:
+            Color(1, 1, 1, 1)  # Red color for the line
+            self.row_separator = Line(points=[0, right_column.height / 2, right_column.width, right_column.height / 2], width=2)
+
+        # Bind size and position to update the separator dynamically
+        right_column.bind(size=self.update_row_separator, pos=self.update_row_separator)
+
+        # Add the second row
+        right_column.add_widget(row2)
+
+        return right_column
+
+    def update_row_separator(self, instance, value):
+        """Update the separator line between the rows."""
+        self.row_separator.points = [
+            instance.x, instance.center_y,  # Start at the center
+            instance.right, instance.center_y  # End at the center
+        ]
+
     def reset_tabs(self, instance):
         """Reset the content of all tabs to their initial state."""
-        # Reset the content of each tab
         self.tab1.content = Tab1Content()
         self.tab2.content = Tab2Content()
         self.tab3.content = Tab3Content()

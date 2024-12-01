@@ -5,10 +5,13 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
+import ServiceManager
+from DataClasses import DeviceFlags
 
 class Tab1Content(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self,service_manager, **kwargs):
         super().__init__(**kwargs)
+        self.service_manager = service_manager
         self.orientation = 'vertical'
         self.spacing = 10
         self.padding = 10
@@ -93,9 +96,10 @@ class Tab1Content(BoxLayout):
 
     def start_action(self, instance):
         """Print the entered details to the console when Start is clicked."""
+        print("clicked satrt action")
         bacteria_name = self.enter_bacteria_name_input.text
         trial_number = self.trial_number_input.text
-
+        #analysis_type = self.a
         # Determine which radio button is selected
         if self.option1.active:
             radio_value = 'Option 1'
@@ -106,7 +110,10 @@ class Tab1Content(BoxLayout):
         else:
             radio_value = 'No option selected'
 
-        # Print the results to the console
-        print(f'Bacteria Name: {bacteria_name}')
-        print(f'Trial Number: {trial_number}')
-        print(f'Selected Analysis Type: {radio_value}')
+        self.service_manager.trialParameters.UID = bacteria_name
+        self.service_manager.trialParameters.TRIAL = int(trial_number) if trial_number.isdigit() else 0
+        #self.service_manager.trialParameters.MODE = analysis_type
+
+        # Set the START_FLAG
+        self.service_manager.deviceFlags.CONFIGURE_FLAG = True
+        self.service_manager.deviceFlags.START_FLAG = True

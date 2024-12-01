@@ -1,68 +1,81 @@
 from DataManager import DataFileManage, LogFileManage
-from ConnectionManager import ConnectionManager
+from ConnectionManager2 import ConnectionManager
 from ModeManager import RecordMode, BreathEmulationMode 
 from DataClasses import TrialParameters,DeviceFlags
 from datetime import datetime
 import time
 import os
+from kivy.clock import Clock
 class ServiceManager:
-        def __init__ (self):
-
-                self.thisConnection=ConnectionManager(self)
-                self.thisConnection.Run_ConnectionHandlerThread()
+        def __init__ (self, gui):
+                self.gui = gui
+                #self.thisConnection=ConnectionManager(self)
+                #self.thisConnection.Run_ConnectionHandlerThread()
                 self.connection_Check=False
                 self.trialParameters=TrialParameters()
                 self.deviceFlags=DeviceFlags()
-                while True:
+                print("contacted Service Manager")
+                Clock.schedule_interval(self.process_flags, 0.5)
 
-                        #thisConnection.Connection_Thread.start()
-                        # This loop waits for connection
-                        time.sleep(0.5)
-                        if self.deviceFlags.CONNECTION_FLAG and self.connection_Check==False:
-                                self.connectionTime=self.GetCurrentTime(1)
-                                self.connection_Check=True
-                                print('Connected!')
-                        elif self.deviceFlags.CONNECTION_FLAG==False:
-                                self.connection_Check=False
+        def process_flags(self, dt):
+                if self.deviceFlags.CONFIGURE_FLAG:
+                        self.configure_device()
+                if self.deviceFlags.START_FLAG:
+                        self.start_mode()
+                if self.deviceFlags.STOP_FLAG:
+                        self.stop_mode()
 
+                if self.deviceFlags.SEND_FILE:
+                        self.send_files()
+        def configure_device(self):
+                """Handle device configuration."""
+                # self.logFileManage = LogFileManage(self)
+                self.dataFileManage = DataFileManage(self)
+                
+                # # Write configuration logs
+                # self.logFileManage.WriteLog('Device Configured', 1)
+                # self.logFileManage.WriteLog(f'UID: {self.trialParameters.UID}', 0)
+                # self.logFileManage.WriteLog(f'Mode: {self.trialParameters.MODE}', 0)
+                # self.logFileManage.WriteLog(f'Trial: {self.trialParameters.TRIAL}', 0)
+                # self.logFileManage.WriteLog(f'Duration: {self.trialParameters.RECORD_DURATION} seconds', 0)
+                # self.logFileManage.WriteLog(f'Sampling Rate: {self.trialParameters.SAMPLING_RATE}', 0)
+                # self.logFileManage.WriteLog(f'Buffer Size: {self.trialParameters.BUFFER_SIZE}', 0)
+                # self.logFileManage.WriteLog(f'User: {self.trialParameters.USER}', 0)
+                # self.logFileManage.WriteLog('-----------------------------------', 0)
 
-                        if self.deviceFlags.CONFIGURE_FLAG and self.deviceFlags.CONNECTION_FLAG:
-                                self.logFileManage=LogFileManage(self)
-                                self.dataFileManage=DataFileManage(self)
-                                self.logFileManage.WriteLog('Device Configured',1)
-                                self.logFileManage.WriteLog('UID: '+ self.trialParameters.UID,0)
-                                self.logFileManage.WriteLog('Mode: '+ self.trialParameters.MODE,0)
-                                self.logFileManage.WriteLog('Trial: '+ str(self.trialParameters.TRIAL),0)
-                                self.logFileManage.WriteLog('Duration: '+ str(self.trialParameters.RECORD_DURATION)+' seconds',0)
-                                self.logFileManage.WriteLog('Sampling Rate: '+ str(self.trialParameters.SAMPLING_RATE),0)
-                                self.logFileManage.WriteLog('Buffer Size: '+ str(self.trialParameters.BUFFER_SIZE),0)
-                                self.logFileManage.WriteLog('User: '+ self.trialParameters.USER,0)
-                                self.logFileManage.WriteLog('-----------------------------------',0)
-                                if self.trialParameters.MODE=="BreathEmulate":
-                                        self.currentMode=BreathEmulationMode(self)
-                                        self.deviceFlags.CONFIGURE_FLAG=False
-                                else:
-                                        self.currentMode=RecordMode(self)
-                                        self.deviceFlags.CONFIGURE_FLAG=False
- 
-                        
-                        if self.deviceFlags.START_FLAG and self.deviceFlags.CONNECTION_FLAG:
-                                self.currentMode.Run()
-                                self.deviceFlags.START_FLAG=False
-                        
-                        if self.deviceFlags.STOP_FLAG and self.deviceFlags.CONNECTION_FLAG:
-                                #self.thisConnection.Stop_ConnectionHandlerThread()
-                                time.sleep(1)
-                                
-                        if self.deviceFlags.SEND_FILE and self.deviceFlags.CONNECTION_FLAG:
-                                self.thisConnection.SendFile(os.path.join(self.logFileManage.logFileFolder,self.logFileManage.log_file_name))
-                                time.sleep(5)
+                # Set mode
+                if self.trialParameters.MODE == "BreathEmulate":
+                        self.currentMode = BreathEmulationMode(self)
+                else:
+                        self.currentMode = RecordMode(self)
+                        self.deviceFlags.CONFIGURE_FLAG = False
+                print("Device configured.")
 
-                                self.thisConnection.SendFile(os.path.join(self.dataFileManage.RecordDataFolder,self.dataFileManage.data_file_name))
+        def start_mode(self):
+                """Start the current mode."""
+                if self.currentMode:
+                        self.currentMode.Run()
+                self.deviceFlags.START_FLAG = False
+                print("Mode started.")
 
+        def stop_mode(self):
+                """Stop the current mode."""
+                print("Mode stopped.")
+                self.deviceFlags.STOP_FLAG = False
 
-                        
-                        
+        def send_files(self):
+                """Send log and data files."""
+                if self.logFileManage and self.dataFileManage:
+                        log_file_path = os.path.join(self.logFileManage.logFileFolder, self.logFileManage.log_file_name)
+                        data_file_path = os.path.join(self.dataFileManage.RecordDataFolder, self.dataFileManage.data_file_name)
+
+                        print(f"Storing log file locally: {log_file_path}")
+                        print(f"Storing data file locally: {data_file_path}")
+
+                        # Simulate sending files locally
+                        # Replace this with actual file management logic
+                        self.deviceFlags.SEND_FILE = False
+                        print("Files sent.")
 
         def GetCurrentTime(self,tpe):
                 #Gets current time and returns in string and integer format

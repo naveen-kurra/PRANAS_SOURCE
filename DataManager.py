@@ -11,8 +11,8 @@ class LogFileManage:
                                         '_T'+str(self.currentService.trialParameters.TRIAL)+\
                                         '_'+currentService.trialParameters.MODE+\
                                         '_'+currentService.GetCurrentTime(3)+'.log'
-                self.WriteLog('Log started on '+self.currentService.GetCurrentTime(2),0)
-                self.WriteLog('Connected to Server at '+ self.currentService.connectionTime,0)
+                self.WriteLog('Log started on ' + self.currentService.GetCurrentTime(2), 0)
+                self.WriteLog('Initialized local system at ' + self.currentService.GetCurrentTime(1), 0)
                 self.currentService=currentService
 
         def WriteLog(self, writeString, tpe):

@@ -8,19 +8,22 @@ from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.graphics import Line, Color
 
-from tab1 import Tab1Content
-from tab2 import Tab2Content
-from tab3 import Tab3Content
+from GUI.tab1 import Tab1Content
+from GUI.tab2 import Tab2Content
+from GUI.tab3 import Tab3Content
 
 class HeaderFooterLayout(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, service_manager,**kwargs):
         super().__init__(**kwargs)
+        self.service_manager = service_manager
         self.orientation = 'vertical'
 
         # Create and add the header
         header = self.create_header()
         self.add_widget(header)
 
+        self.tab1_content = Tab1Content(service_manager)
+        self.add_widget(self.tab1_content)
         # Create and add the body with tabs and the reset button
         body = self.create_body()
         self.add_widget(body)
@@ -92,7 +95,7 @@ class HeaderFooterLayout(BoxLayout):
 
         # Create Tab 1
         self.tab1 = TabbedPanelItem(text='Tab 1')
-        self.tab1.content = Tab1Content()
+        self.tab1.content = Tab1Content(self.service_manager)
         tab_panel.add_widget(self.tab1)
 
         # Create Tab 2
@@ -140,7 +143,7 @@ class HeaderFooterLayout(BoxLayout):
 
     def reset_tabs(self, instance):
         """Reset the content of all tabs to their initial state."""
-        self.tab1.content = Tab1Content()
+        self.tab1.content = Tab1Content(self.service_manager)
         self.tab2.content = Tab2Content()
         self.tab3.content = Tab3Content()
 
@@ -179,9 +182,9 @@ class HeaderFooterLayout(BoxLayout):
         separator_x = instance.width * 0.6  # 60% of the body's width
         self.separator_line.points = [separator_x, instance.y, separator_x, instance.top]
 
-class PranasApp(App):
-    def build(self):
-        return HeaderFooterLayout()
+# class PranasApp(App):
+#     def build(self):
+#         return HeaderFooterLayout()
 
-if __name__ == '__main__':
-    PranasApp().run()
+# if __name__ == '__main__':
+#     PranasApp().run()
